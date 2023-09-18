@@ -91,7 +91,7 @@ describe('Commit Field Tests', () => {
   });
 });
 
-describe('Payload Tests', () => {
+describe('Webhook Payload Tests', () => {
   const context = {
     jobName: 'test',
     status: 'success',
@@ -119,7 +119,7 @@ describe('Payload Tests', () => {
     expect(Slack.isMention('success', 'failure')).toBe(false);
   });
 
-  test('Generate slack payload', () => {
+  test('Generate slack webhook payload', () => {
     github.context.eventName = 'pull_request';
     const eventUrl = `${repoUrl}/pull/${commonContext.number}`;
 
@@ -169,7 +169,73 @@ describe('Payload Tests', () => {
     };
 
     expect(
-      Slack.generatePayload(
+      Slack.generateWebhookPayload(
+        context.jobName,
+        context.status,
+        context.mention,
+        context.mentionCondition,
+        context.commit
+      )
+    ).toEqual(expectedPayload);
+  });
+
+  test('Generate slack api payload', () => {
+    github.context.eventName = 'pull_request';
+    const eventUrl = `${repoUrl}/pull/${commonContext.number}`;
+
+    const expectedPayload = {
+      text: `<!${context.mention}> ${context.jobName} ${
+        Block.status[context.status]['result']
+      }`,
+      attachments: [
+        {
+          color: Block.status[context.status]['color'],
+          blocks: [
+            {
+              type: 'section',
+              fields: [
+                {
+                  type: 'mrkdwn',
+                  text: `*repository*\n<${repoUrl}|${commonContext.owner}/${commonContext.repo}>`
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*ref*\n${commonContext.ref}`
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*event name*\n<${eventUrl}|${github.context.eventName}>`
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*workflow*\n<${eventUrl}/checks|${commonContext.workflow}>`
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*commit*\n<${context.commit.url}|${
+                    context.commit.message.split('\n')[0]
+                  }>`
+                },
+                {
+                  type: 'mrkdwn',
+                  text: `*author*\n<${context.commit.author.url}|${context.commit.author.name}>`
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      unfurl_links: true,
+      username: 'username',
+      channel: 'channel',
+      icon_emoji: 'icon_emoji'
+    };
+
+    expect(
+      Slack.generateApiPayload(
+        'username',
+        'channel',
+        'icon_emoji',
         context.jobName,
         context.status,
         context.mention,
@@ -182,21 +248,36 @@ describe('Payload Tests', () => {
 
 describe('Post Message Tests', () => {
   const baseUrl = 'https://this.is.test';
-  const options = {
-    username: 'lazy-actions',
-    channel: 'test',
-    icon_emoji: 'pray'
-  };
   const payload = JSON.parse(
     fs.readFileSync(path.join(__dirname, 'payload.json'), {encoding: 'utf8'})
   );
 
-  test('Post successfully', async () => {
+  test('Post webhook successfully', async () => {
     nock(baseUrl)
       .post('/success')
       .reply(200, 'ok');
 
-    const res = await Slack.notify(`${baseUrl}/success`, options, payload);
+    const res = await Slack.notifyWebhook(
+      `${baseUrl}/success`,
+      'lazy-actions',
+      'test',
+      'pray',
+      payload
+    );
+    expect(res).toBe(undefined);
+  });
+
+  test('Post api successfully', async () => {
+    nock('https://slack.com')
+      .post('/api/chat.postMessage')
+      .reply(200, {
+        ok: true
+      });
+
+    const res = await Slack.notifyApi(`${baseUrl}/success`, {
+      text: 'test',
+      channel: 'lazy-actions'
+    });
     expect(res).toBe(undefined);
   });
 
@@ -206,7 +287,13 @@ describe('Post Message Tests', () => {
       .reply(404, {error: 'channel_not_found'});
 
     try {
-      await Slack.notify(`${baseUrl}/failure`, options, payload);
+      await Slack.notifyWebhook(
+        `${baseUrl}/failure`,
+        'lazy-actions',
+        'test',
+        'pray',
+        payload
+      );
     } catch (err) {
       expect(err.message).toBe('Failed to post message to Slack');
     }

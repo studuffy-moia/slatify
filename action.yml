@@ -33,6 +33,9 @@ inputs:
   token:
     description: 'need to get commit data'
     required: false
+  slack_bot_token:
+    description: 'in order to use the web api'
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'

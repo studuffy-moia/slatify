@@ -28,13 +28,14 @@
   "dependencies": {
     "@actions/core": "^1.2.1",
     "@actions/github": "^4.0.0",
-    "@slack/webhook": "^5.0.1"
+    "@slack/webhook": "^5.0.1",
+    "@slack/web-api": "^5.0.1"
   },
   "devDependencies": {
     "@types/jest": "^24.9.0",
     "@types/nock": "^11.1.0",
     "@types/node": "^12.12.25",
-    "@vercel/ncc": "^0.24.1",
+    "@vercel/ncc": "^0.25.1",
     "jest": "^24.8.0",
     "nock": "^13.0.11",
     "prettier": "^1.17.1",
