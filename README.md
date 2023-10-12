@@ -55,7 +55,7 @@ You can customize the following parameters:
 |mention_if|optional|N/A|The condition to mention<br>This parameter can contain the following word:<br>- `success`<br>- `failure`<br>- `cancelled`<br>- `always`|
 |icon_emoji|optional|Use Slack Incoming Webhook configuration|Slack icon|
 |username|optional|Use Slack Incoming Webhook configuration|Slack username|
-|channel|optional|Use Slack Incoming Webhook configuration|Slack channel name|
+|channel|optional (required when using `slack_bot_token`)|Use Slack Incoming Webhook configuration|Slack channel name, eg. `#example`|
 |commit|optional|false|If true, slack notification includes the latest commit message and author.|
 |token|case by case|N/A|This token is used to get commit data.<br>If commit parameter is true, this parameter is required.<br>${{ secrets.GITHUB_TOKEN }} is recommended.|
 
