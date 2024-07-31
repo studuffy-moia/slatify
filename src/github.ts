@@ -46,6 +46,10 @@ function isPullRequest(): boolean {
   return context.eventName === 'pull_request';
 }
 
+function isWorkflowDispatch(): boolean {
+  return context.eventName === 'workflow_dispatch';
+}
+
 export function getWorkflowUrls(): WorkflowUrl {
   const {owner, repo} = context.repo;
   const repoUrl: string = `https://github.com/${owner}/${repo}`;
@@ -58,6 +62,9 @@ export function getWorkflowUrls(): WorkflowUrl {
     const number = context.issue.number;
     result.event = `${repoUrl}/pull/${number}`;
     result.action = `${result.event}/checks`;
+  } else if (isWorkflowDispatch()) {
+    const runId = context.runId;
+    result.action = `${repoUrl}/actions/runs/${runId}`
   } else {
     result.action = `${repoUrl}/commit/${context.sha}/checks`;
   }
