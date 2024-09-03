@@ -69,7 +69,7 @@ async function run() {
     );
     core.debug(`Generated payload for slack api: ${JSON.stringify(payload)}`);
 
-    await Slack.notifyApi(slackBotToken, payload);
+    // await Slack.notifyApi(slackBotToken, payload);
     core.info('Post message to Slack Web API');
   }
 }
