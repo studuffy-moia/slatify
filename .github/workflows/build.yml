@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - ci-test
+      - another
     paths:
       - "**.ts"
       - "package.json"
