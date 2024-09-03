@@ -47,8 +47,9 @@ function isPullRequest(): boolean {
 }
 
 export function getWorkflowUrls(): WorkflowUrl {
-  console.log('Hello inside get workflow urls');
-  console.log(context.eventName);
+  if (context.eventName.length === 0) {
+    throw new Error('not workflow dispatch');
+  }
   const {owner, repo} = context.repo;
   const repoUrl: string = `https://github.com/${owner}/${repo}`;
   const result: WorkflowUrl = {
