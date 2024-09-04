@@ -14260,6 +14260,9 @@ exports.getCommit = getCommit;
 function isPullRequest() {
     return github_1.context.eventName === 'pull_request';
 }
+function isWorkflowDispatch() {
+    return github_1.context.eventName === 'workflow_dispatch';
+}
 function getWorkflowUrls() {
     const { owner, repo } = github_1.context.repo;
     const repoUrl = `https://github.com/${owner}/${repo}`;
@@ -14271,6 +14274,10 @@ function getWorkflowUrls() {
         const number = github_1.context.issue.number;
         result.event = `${repoUrl}/pull/${number}`;
         result.action = `${result.event}/checks`;
+    }
+    else if (isWorkflowDispatch()) {
+        const runId = github_1.context.runId;
+        result.action = `${repoUrl}/actions/runs/${runId}`;
     }
     else {
         result.action = `${repoUrl}/commit/${github_1.context.sha}/checks`;
